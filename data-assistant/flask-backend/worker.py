@@ -2,10 +2,10 @@ import os
 import logging
 import torch
 from dotenv import load_dotenv
-from langchain.chat_models import ChatGroq
-from langchain.embeddings import HuggingFaceInstructEmbeddings
-from langchain.document_loaders import PyPDFLoader
-from langchain.vectorstores import Chroma
+from langchain_groq import ChatGroq
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.vectorstores import Chroma
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
 
@@ -31,14 +31,14 @@ def init_llm():
     MODEL_ID = "mixtral-8x7b-32768" 
     llm_hub = ChatGroq(
         model_name=MODEL_ID,
-        groq_api_key=GROQ_API_KEY
+        groq_api_key=GROQ_API_KEY,
+        temperature=0.7
     )
     logger.debug("Groq LLM initialized: %s", llm_hub)
 
-
-    embeddings = HuggingFaceInstructEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2", 
-        model_kwargs={"device": DEVICE}
+    embeddings = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-mpnet-base-v2",
+        model_kwargs={'device': DEVICE}
     )
     logger.debug("Embeddings initialized with model device: %s", DEVICE)
     return llm_hub, embeddings
@@ -77,6 +77,9 @@ def process_document(document_path):
 def process_prompt(prompt):
     global conversation_retrieval_chain
     global chat_history
+
+    if conversation_retrieval_chain is None:
+        return "Please upload a PDF document first before asking questions."
 
     logger.info("Processing prompt: %s", prompt)
     
