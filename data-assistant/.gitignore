@@ -46,3 +46,4 @@ README.md
 
 #flask
 flask-backend/uploads/
+flask-backend/__pycache__/
